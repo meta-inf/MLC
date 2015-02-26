@@ -1,0 +1,1 @@
+(letrec ((fib (fun (n) (let ((m/1a/0 (fun (m/d) 1)) (m/1a/1 (fun (m/d) 1)) (m/1a/2 (fun (n) ((+ (fib ((- n) 1))) (fib ((- n) 2)))))) (cond (((== 0) n) (cond (((== 1) n) (m/1a/2 n)) (#t (m/1a/0 0)))) (#t (cond (((== 1) n) (m/1a/1 0)) (#t (m/1a/2 n))))))))) (let ((_ (dispi (fib 20)))) 0))

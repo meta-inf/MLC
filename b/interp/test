@@ -1,0 +1,5 @@
+#load "ast.cmo";;
+#load "parse.cmo";;
+#load "value.cmo";;
+#load "interp.cmo";;
+#load "test.cmo";;

@@ -1,0 +1,409 @@
+fix closure =
+ a b i =
+  call i b
+ fix closure =
+  g d =
+   term
+
+  call a 5 g
+fix g = (1 vars) 
+<term>
+fix a = (2 vars) 
+call s1 s0
+main = 
+s0 = tuple
+s1 = tuple s0 f.a
+s2 = tuple
+s3 = tuple s2 f.g
+call s1 imm5 s3
+
+
+fix closure =
+ g a f =
+  fix closure = a
+   j b i =
+    tuple c#0 b 2 =: h
+    call i h
+   call f j
+ term
+
+fix g = (4 vars) 
+s2 = tuple s0
+s3 = tuple s2 f.j
+call s1 s3
+fix j = (3 vars) 
+s2 = tuple c0 s0 imm2
+call s1 s2
+main = 
+s0 = tuple
+s1 = tuple s0 f.g
+<term>
+
+
+fix closure =
+ a b m =
+  fix closure = b
+   p c o =
+    + c#0 2 =: q
+    + c 3 =: r
+    tuple q r =: n
+    call o n
+   call m p
+ fix closure =
+  h e =
+   term
+
+  fix closure = h
+   k g =
+    call g 3 c#0
+   call a 2 k
+fix k = (1 vars) 
+call s0 imm3 c0
+fix h = (1 vars) 
+<term>
+fix a = (4 vars) 
+s2 = tuple s0
+s3 = tuple s2 f.p
+call s1 s3
+fix p = (5 vars) 
+mov r1 c0
+r0 = r1 + imm2
+r2 = r1 + imm3
+s4 = tuple r0 r2
+call s1 s4
+main = 
+s0 = tuple
+s1 = tuple s0 f.a
+s2 = tuple
+s3 = tuple s2 f.h
+s4 = tuple s3
+s5 = tuple s4 f.k
+call s1 imm2 s5
+
+
+ref 0 =: a
+deref a =: c
+term
+
+main = 
+r0 = ref imm0
+r1 = deref r0
+<term>
+
+
+- 1 2 =: g
+/ 1 g =: f
+* f 3 =: d
++ d 4 =: b
+term
+
+main = 
+r0 = imm1 - imm2
+mov c0 r0
+mov r0 imm0
+mov r3 imm1
+s1 = / r0
+mov s1 r0
+mov r0 c0
+mov r2 s1
+r1 = r2 * imm3
+r3 = r1 + imm4
+<term>
+
+
+fix closure =
+ g d =
+  term
+
+ fix closure =
+  o b n =
+   fix closure = n
+    r m =
+     call c#0 m
+    call b 2 r
+  fix closure =
+   j a i =
+    + a 2 =: h
+    call i h
+   call o j g
+fix j = (3 vars) 
+mov r1 s0
+r0 = r1 + imm2
+call s1 r0
+fix o = (4 vars) 
+s2 = tuple s1
+s3 = tuple s2 f.r
+call s0 imm2 s3
+fix r = (1 vars) 
+call c0 s0
+fix g = (1 vars) 
+<term>
+main = 
+s0 = tuple
+s1 = tuple s0 f.g
+s2 = tuple
+s3 = tuple s2 f.o
+s4 = tuple
+s5 = tuple s4 f.j
+call s3 s5 s1
+
+
+fix closure =
+ a b i =
+  = b 0 =: r
+  cond r
+   call i 1
+   cond #t
+    fix closure = b i
+     o k =
+      * c#0 k =: h
+      call c#1 h
+     - b 1 =: m
+     call a m o
+    call i ()
+ fix closure =
+  g d =
+   term
+
+  call a 10 g
+fix g = (1 vars) 
+<term>
+fix a = (6 vars) 
+mov r1 s0
+r0 = r1 = imm0
+cond r0
+call s1 imm1
+cond r0 - false
+cond imm1
+s3 = tuple r1 s1
+s4 = tuple s3 f.o
+r2 = r1 - imm1
+call f.a r2 s4
+cond imm1 - false
+call s1 imm0
+fix o = (2 vars) 
+mov r1 c0
+r0 = r1 * r1
+call c1 r0
+main = 
+s0 = tuple
+s1 = tuple s0 f.a
+s2 = tuple
+s3 = tuple s2 f.g
+call s1 imm10 s3
+
+
+fix closure =
+ a b m =
+  fix closure = b a
+   p c o =
+    = c#0 0 =: B
+    cond B
+     call o c
+     cond #t
+      fix closure = o
+       t n =
+        call c#0 n
+       fix closure = c#0 c t
+        y s =
+         * c#1 c#0 =: r
+         call s r c#2
+        - c#0 1 =: w
+        call c#1 w y
+      call o ()
+   call m p
+ fix closure =
+  h e =
+   term
+
+  fix closure = h
+   k g =
+    call g 1 c#0
+   call a 100000 k
+fix k = (1 vars) 
+call s0 imm1 c0
+fix h = (1 vars) 
+<term>
+fix a = (4 vars) 
+s2 = tuple s0 f.a
+s3 = tuple s2 f.p
+call s1 s3
+fix p = (8 vars) 
+mov r1 c0
+r0 = r1 = imm0
+cond r0
+call s1 r1
+cond r0 - false
+cond imm1
+s3 = tuple s1
+s4 = tuple s3 f.t
+s5 = tuple r1 r1 s4
+s6 = tuple s5 f.y
+r2 = r1 - imm1
+call c1 r2 s6
+cond imm1 - false
+call s1 imm0
+fix y = (2 vars) 
+mov r2 c0
+mov r1 c1
+r0 = r1 * r2
+call s0 r0 c2
+fix t = (1 vars) 
+call c0 s0
+main = 
+s0 = tuple
+s1 = tuple s0 f.a
+s2 = tuple
+s3 = tuple s2 f.h
+s4 = tuple s3
+s5 = tuple s4 f.k
+call s1 imm100000 s5
+
+
+fix closure =
+ f c =
+  term
+
+ fix closure =
+  u a t =
+   + a 2 =: s
+   call t s
+  fix closure = f u
+   l j =
+    + j 5 =: h
+    * h 6 =: d
+    call c#1 d c#0
+   cond #f
+    + 2 3 =: k
+    call l k
+    cond #t
+     * 3 5 =: k
+     call l k
+     call l ()
+fix l = (3 vars) 
+mov r1 s0
+r0 = r1 + imm5
+r2 = r0 * imm6
+call c1 r2 r1
+fix u = (3 vars) 
+mov r1 s0
+r0 = r1 + imm2
+call s1 r0
+fix f = (1 vars) 
+<term>
+main = 
+s0 = tuple
+s1 = tuple s0 f.f
+s2 = tuple
+s3 = tuple s2 f.u
+s4 = tuple s1 s3
+s5 = tuple s4 f.l
+cond imm0
+r0 = imm2 + imm3
+call s5 r0
+cond imm0 - false
+cond imm1
+r0 = imm3 * imm5
+call s5 r0
+cond imm1 - false
+call s5 imm0
+
+
+/ 1 2 =: P
+* P 3 =: N
+- N 4 =: L
++ L 5 =: J
+/ J 6 =: H
+* H 7 =: F
+- F 8 =: D
++ D 9 =: B
+/ B 10 =: z
+* z 11 =: x
+- x 12 =: v
++ v 13 =: t
+/ t 14 =: r
+* r 15 =: p
+- p 16 =: n
++ n 17 =: l
+/ l 18 =: j
+/ j 19 =: h
+* h 20 =: f
+- f 21 =: d
++ d 22 =: b
+term
+
+main = 
+mov r0 imm0
+mov r3 imm1
+s0 = / imm2
+mov s0 r0
+mov r1 s0
+r0 = r1 * imm3
+r2 = r0 - imm4
+r3 = r2 + imm5
+mov c0 r0
+mov c3 r3
+mov r0 imm0
+mov r3 r3
+s4 = / imm6
+mov s4 r0
+mov r3 c3
+mov r0 c0
+mov r5 s4
+r4 = r5 * imm7
+r6 = r4 - imm8
+r7 = r6 + imm9
+mov c0 r0
+mov c3 r3
+mov r0 imm0
+mov r3 r7
+s8 = / imm10
+mov s8 r0
+mov r3 c3
+mov r0 c0
+mov r9 s8
+r8 = r9 * imm11
+r10 = r8 - imm12
+r11 = r10 + imm13
+mov c0 r0
+mov c3 r3
+mov r0 imm0
+mov r3 r11
+s12 = / imm14
+mov s12 r0
+mov r3 c3
+mov r0 c0
+mov c0 r1
+mov r1 s12
+r12 = r1 * imm15
+mov s1 r0
+r0 = r12 - imm16
+mov s2 r2
+r2 = r0 + imm17
+mov c0 r0
+mov c3 r3
+mov r0 imm0
+mov r3 r2
+s16 = / imm18
+mov s16 r0
+mov r3 c3
+mov r0 c0
+mov c0 r0
+mov c3 r3
+mov r0 imm0
+mov r3 s16
+s17 = / imm19
+mov s17 r0
+mov r3 c3
+mov r0 c0
+mov s4 r5
+mov r5 s17
+mov s3 r3
+r3 = r5 * imm20
+mov s5 r4
+r4 = r3 - imm21
+mov s6 r6
+r6 = r4 + imm22
+<term>
+
+

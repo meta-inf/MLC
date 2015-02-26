@@ -1,0 +1,58 @@
+
+(*
+let markFreq mexp = 
+  let inc mval fmap =
+    match mval with
+    | Stk i -> IntMap.add -i fmap
+    | Clo i -> IntMap.add i fmap
+    | _ -> fmap
+  in
+  match mexp with
+  | MPrimOp1 (_, id, dst, src, k) ->
+    let k' = markFreq k in
+    MPrimOp1 (getFreq k' |> inc dst |> inc src, id, dst, src, k')
+  | MPrimOp2 (_, id, dst, s1, s2, k) ->
+    let k' = markFreq k in
+    MPrimOp2 (getFreq k' |> inc dst |> inc s1 |> inc s2, id, dst, s1, s2, k')
+  | MCond (_, id, k1, k2) ->
+    let (k1', k2') = (markFreq k1, markFreq k2) in
+    MCond (getFreq k1 |> inc id, id, k1', k2')
+  | MFunApp (_, id, lst) ->
+    MFunApp (List.fold_left 
+               (fun a b -> inc b a) lst
+               (IntMap.empty |> inc id),
+             id, lst)
+  | MTuple (_, dst, lst, k) ->
+    let k' = markFreq k in
+    MTuple (List.fold_left (fun a b -> inc b a) lst 
+              (getFreq k' |> inc dst), dst, lst, k')
+  | MClosure (_, lst, arr, k) ->
+    let k' = markFreq k in
+    MClosure (getFreq k', lst, arr, k') (* 不统计也没关系吧... *)
+
+module RegMap =
+struct
+  type t = (int IntMap.t) * (mvalue array) * (mvalue array)
+  let make () = (IntMap.empty, Array.make 16 (Imm 0), Array.make 16 (ImmF 0))
+  let empty = (IntMap.empty, [||], [||])
+  let assign mval fmap rmap =
+
+  let load mval fmap rmap = 
+    match mval with
+    | (Stk _ | Clo _) -> 
+      if FreqMap.find mval fmap = 1 then mval else assign mval fmap rmap
+    | _ -> mval
+end
+
+let registerize mexp rmap =
+  let find a b = try IntMap.find a b with Not_found -> 0 in
+  let fmap = getFreq mexp in
+  let load mval = 
+    match mval with
+    | Stk i -> if find i fmap = 1 then mval else RegMap.assign 
+    | Clo i -> if find -i fmap = 1 then 
+    | _ -> _
+  in
+  match mexp with
+  | MPrimOp1 (fm, id, dst, src, k) ->
+    MPrimOp1 (fm, id, 
