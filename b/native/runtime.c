@@ -9,6 +9,12 @@
 
 extern heap_t heap[2];
 
+void match_failure (int a)
+{
+	printf("Match failure\n");
+	exit(1);
+}
+
 int equiv (qword a, qword b)
 {
 	qword header, *x, *y;

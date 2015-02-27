@@ -98,7 +98,9 @@ struct
     | (Func(id, body, _), RecV) -> Func(id, body, env)
     | (other, RecV) -> other
   (* `letrec f = let p = 2 in function -> ...` is not supported *)
-  let add id value env = IntMap.add id (value, NormalV) env
+  let add id value env = 
+    IntMap.add id (value, NormalV) env 
+
   let add_r id value env = IntMap.add id (value, RecV) env
 
   let rec loadBuiltinFunc lst table =

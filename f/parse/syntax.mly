@@ -57,7 +57,6 @@ stmt:	expr SEMICOLON	{ Expr $1 }
 ;
 
 %inline op:	EQUAL	{ "=" (* FIXME *) }
-|	LISTCONS	{ "::" }
 |	_op = OP0	{ _op }
 |	_op = OP1	{ _op }
 |	_op = OP2	{ _op }
@@ -73,6 +72,8 @@ expr:	atom_expr	{ $1 }
 		| _ -> FunApp ($1, $2) }
 |	l = expr; o = op; r = expr
 		{ FunApp (FunApp (Var o, l), r) }
+|	l = expr; LISTCONS; r = expr
+		{ AlType ("list", [l; r]) }
 |	LET h = letbinding t = preceded(AND, letbinding)* IN b = expr
 		{ Let (NonRec, h :: t, b) }
 |	LET REC h = letbinding t = preceded(AND, letbinding)* IN b = expr

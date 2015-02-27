@@ -22,8 +22,8 @@ and funAppCont arg env refs cont =
     (eval arg env refs (fun a -> cont (impl a)))
   | BuiltinFuncS impl -> 
     (eval arg env refs (fun a -> cont (impl a refs)))
-  | Func (id, exp, env) -> 
-    (eval arg env refs (fun a -> eval exp (Table.add id a env) refs cont))
+  | Func (id, exp, env1) -> (* WTF *)
+    (eval arg env refs (fun a -> eval exp (Table.add id a env1) refs cont))
   | _ -> failwith "fun-app: not a function"
 
 and letRecCont lst body env refs cont =

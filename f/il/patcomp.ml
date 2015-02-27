@@ -12,7 +12,7 @@ let collectTrait: Ast.pattern -> trait list =
     | PTuple lst -> 
       L.iteri (fun i sub -> trav sub ret pre (i :: loc)) lst
     | PAlType (s, lst) ->
-      let pre' = TNode (pre, loc, ALabel s) in
+      let pre' = TNode (pre, 0 :: loc, ALabel s) in
       begin
         ret := pre' :: !ret;
         L.iteri (fun i sub -> trav sub ret pre' ((i + 1) :: loc)) lst

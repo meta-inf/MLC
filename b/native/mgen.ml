@@ -151,7 +151,9 @@ let rec genPrimOp1 id dst p1 rmap =
                  AD.(_mov (fromMV dst) (M "[r14 + 8]"))]
   | "ref" ->    genExternCall "make_tuple" 
                   [Imm 2; Imm (0x1ef lsl 40); p1] rmap dst true
-  | _ -> raise Not_found;
+  | "match_failure" ->
+                genExternCall "match_failure" [p1] rmap dst false
+  | _ -> failwith "genPrimOp1: not implemented";
 
 and genPrimOp2 id dst p1 p2 rmap = 
   let opname = snd (Parse.IdTable.str_of_id id) in
@@ -162,14 +164,24 @@ and genPrimOp2 id dst p1 p2 rmap =
             AD.op2 "imul"  (v2s dst) (v2s p2);
             AD.op2 "shr"   (v2s dst) "1"]
   |"or" -> [AD.mov dst p1; AD.op2 "or"  (v2s dst) (v2s p2)];
-  |"==" -> [AD.op2 "cmp"   (v2s p1) (v2s p2);
+  |"==" -> (
+    let p1, p2 = 
+      match p1 with Imm _ | ImmS _ | Label _ -> p2, p1 | _ -> p1, p2 in
+    match p1 with
+    | Imm _ | ImmS _ | Label _ -> failwith "Should have been folded"
+    | _ -> [AD.op2 "cmp"   (v2s p1) (v2s p2);
             AD.op1 "setz"  (l8bit dst);
-            AD.op2 "movzx" (v2s dst) (l8bit dst)];
+            AD.op2 "movzx" (v2s dst) (l8bit dst)];)
   | "=" -> genExternCall "equiv" [p1; p2] rmap dst false
-  | "tuple-sel" -> ( (* note: tuple-sel 0 will use in-memory representation *)
+  | "tuple-sel" -> ( 
     match p1 with
     | Imm d -> [AD.op2 "movshr" "r14" (v2s p2);
                 AD.(_mov (fromMV dst) (M (print "[r14 + %d]" (8 * d))))]
+               @
+               (if (d = 0) then
+                  [AD.(op2 "mov" "r14" "0xffffffffffff");
+                   AD.(op2 "and" (toAS @@ fromMV dst) "r14") ]
+                else [])
     | _ -> raise @@ Invalid_argument "tuple-sel: invalid operand")
   | "set-ref" -> [AD.op2 "movshr" "r14" (v2s p1);
                   AD.(_mov (M "[r14 + 8]") (fromMV p2))]
@@ -309,7 +321,7 @@ let mgen ((strmap, fix): RM.t Prog.t) =
                genDataSection strmap;
                ["\nsection .text\n";
                 "global\tmain";
-                "extern\tdisp, make_tuple, dispi, heap_init, gc_check, equiv"];
+                "extern\tdisp, make_tuple, dispi, heap_init, gc_check, equiv, match_failure"];
                List.concat @@ List.map genFuncBody fix;
               ]
 
