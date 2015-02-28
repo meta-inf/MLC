@@ -2,4 +2,5 @@ Patcomp
 PatAux
 IAst
 Env
+Uncurry
 Translate

@@ -73,7 +73,8 @@ and eval expr env refs cont =
   | Lambda ([id], body) -> cont (Func (id, body, env))
   | Lambda _ -> failwith "eval"
   | Cond lst -> eval (fst @@ List.hd lst) env refs (condCont lst env refs cont)
-  | FunApp (func, arg) -> eval func env refs (funAppCont arg env refs cont)
+  | FunApp (func, [arg]) -> eval func env refs (funAppCont arg env refs cont)
+  | FunApp (func, _) -> failwith "Eval.eval: should have been simplified"
   | FunApp1 (id, arg) -> (
     match Reduce0.builtinFunc id with
     | BuiltinFunc f -> 
@@ -103,7 +104,9 @@ let rec simplify e =
   | Cond lst -> Cond (List.map (fun (a, b) -> (simplify a, simplify b)) lst)
   | Lambda (lst, e) -> 
     List.fold_right (fun i e -> Lambda ([i], e)) lst (simplify e) 
-  | FunApp (s, e) -> FunApp (simplify s, simplify e)
+  | FunApp (s, []) -> failwith "Eval.simplify: ..."
+  | FunApp (s, [e]) -> FunApp (simplify s, [simplify e])
+  | FunApp (s, e :: rst) -> simplify (FunApp (FunApp (s, [e]), rst))
   | FunApp1 (i, e) -> FunApp1 (i, simplify e)
   | FunApp2 (i, a, b) -> FunApp2 (i, simplify a, simplify b)
   | Let (lst, k) -> 

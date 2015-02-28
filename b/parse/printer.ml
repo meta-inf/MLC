@@ -29,8 +29,7 @@ let rec printAstT t = match t with
   | FunApp (func, param) -> begin
       printf "(";
       printAstT func;
-      printf " ";
-      printAstT param;
+      List.iter (fun p -> (printf " "; printAstT p)) param;
       printf ")";
     end
   | FunApp1 (id, param) -> begin

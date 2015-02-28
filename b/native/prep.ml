@@ -26,7 +26,7 @@ let rec rename0 expr env =
   | Identifier id -> Identifier (IDSet.queryID id env)
   | Cond lst -> 
     Cond (List.map (fun (cd, vl) -> (rename0 cd env, rename0 vl env)) lst)
-  | FunApp (f, v) -> FunApp (rename0 f env, rename0 v env)
+  | FunApp (f, v) -> FunApp (rename0 f env, List.map (fun x -> rename0 x env) v)
   | FunApp1 (i, v) -> (assert((IDSet.queryID i env) == i);
                        FunApp1 (i, rename0 v env))
   | FunApp2 (i, f, v) -> (assert((IDSet.queryID i env) == i);

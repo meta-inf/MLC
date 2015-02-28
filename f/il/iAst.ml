@@ -6,7 +6,7 @@ type iexpr =
   | Identifier of string
   | Cond of (iexpr * iexpr) list
   | Lambda of (string list) * iexpr
-  | FunApp of iexpr * iexpr (* general functions *)
+  | FunApp of iexpr * (iexpr list) (* general functions *)
   | Let of (string * iexpr) list * iexpr
   | LetRec of (string * iexpr) list * iexpr
   | Seq of iexpr list
@@ -25,7 +25,7 @@ let rec map_e f = function
   | Lambda (sl, v) -> 
     Lambda (sl, 
             map_e (fun s -> if List.mem s sl then s else f s) v)
-  | FunApp (u, v) -> FunApp (map_e f u, map_e f v)
+  | FunApp (u, v) -> FunApp (map_e f u, List.map (map_e f) v)
   | Let (lst, e) -> 
     Let (
       List.map 
@@ -72,8 +72,9 @@ and vprint t =
       in List.iteri pfunc lst;
       printf ")";
     end
-  | FunApp (func, param) -> 
-    (printf "("; vprint func; printf " "; vprint param; printf ")")
+  | FunApp (func, param) ->  (* TODO *)
+    (printf "("; vprint func; 
+     List.iter (fun p -> (printf " "; vprint p)) param; printf ")")
 
   | Lambda (ids, value) -> begin
       printf "(fun (%s)\n" (String.concat " " ids);

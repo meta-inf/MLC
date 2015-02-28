@@ -84,9 +84,15 @@ let rec trans0 (exp: Ast.expr) (ct: int ref) (k: dexp) =
 
   | Ast.FunApp (f, v) -> 
     let DExp (kvi, kimpl) = k in
-    let (ki, fi, vi) = C.get3 ct in
-    DFix ([(ki, [kvi], kimpl)], 
-          trans f @@ DExp (fi, trans v @@ DExp (vi, DFunApp (fi, [vi; ki]))))
+    let (ki, fi) = C.get2 ct in
+    let vi = List.map (fun e -> (e, C.get ct)) v in
+    let vcont = 
+      List.fold_right 
+        (fun sum (ce, cid) -> trans ce @@ DExp (cid, sum))
+        vi
+        DFunApp (fi, (List.map snd vi) @ [ki])
+    in
+    DFix ([(ki, [kvi], kimpl)], trans f @@ DExp (fi, vcont))
 
   | Ast.Lambda (args, v) -> 
     (* li: the lambda expr; k0: its cont.; vi: the result of fun body *)

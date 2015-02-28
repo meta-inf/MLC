@@ -26,11 +26,13 @@ and trans0: expr -> iexpr =
     | Ast.AlType (s, ls) ->
       IAst.Tuple ((IAst.IntConst (Env.findOrAdd s)) :: (L.map trans0 ls))
     | Ast.FunApp (f, v) ->
-      IAst.FunApp (trans0 f, trans0 v)
-    | Ast.Func ([PVar s], body) ->
-      IAst.Lambda ([s], trans0 body)
+      IAst.FunApp (trans0 f, [trans0 v])
+    | Ast.Func (lst, body) ->
+      IAst.Lambda (L.map (fun (PVar s) -> s) lst, trans0 body)
     | Ast.IfExp (cond, br0, Some br1) ->
       IAst.makeIf (trans0 cond, trans0 br0, trans0 br1)
+    | Ast.IfExp (cond, br0, None) ->
+      IAst.Cond [trans0 cond, trans0 br0]
 
     | Ast.Let (NonRec, bindings, value) ->
       IAst.Let (transBnds bindings, trans0 value)
@@ -48,6 +50,7 @@ and trans0: expr -> iexpr =
 
     | Ast.Grouped lst -> IAst.Seq (L.map trans0 lst)
 
+
 let translate stmts =
   let aux a b =
     match a with
@@ -58,5 +61,5 @@ let translate stmts =
     | GLetExp (Let (Rec, bnd, _)) -> 
       IAst.LetRec (transBnds bnd, b)
     | _ -> failwith ""
-  in L.fold_right aux stmts (IAst.IntConst 0)
+  in Uncurry.uncurry @@ L.fold_right aux stmts (IAst.IntConst 0)
 

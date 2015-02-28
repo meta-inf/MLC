@@ -5,7 +5,7 @@ open Il
 let compile s = 
   let t = Parser.parse1 s in
   let _ = Infer.infer t in
-  let r = List.map Pretype.convert t in
+  let r = List.map Pretype.convertP t in
   let u = Translate.translate r in
   u
   

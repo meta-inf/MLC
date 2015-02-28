@@ -218,7 +218,7 @@ type typing_result =
   | TRNone
 
 let infer stmt tenv venv =
-  match convert stmt with
+  match convertF stmt with
   | Expr e ->
     TRExp (V.finalize (typeOf e !tenv venv) venv)
   | AlTypeDecl _ -> 
@@ -238,3 +238,4 @@ let infer stmt tenv venv =
             (id, u)))
         (List.combine k' tags)
     in TRLet res
+  | _ -> failwith "infer"

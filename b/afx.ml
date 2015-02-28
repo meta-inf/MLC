@@ -2,6 +2,8 @@ module IntMap = Map.Make(struct type t = int let compare = compare end)
 module StrMap = Map.Make(struct type t = string let compare = compare end)
 module IntSet = Set.Make(struct type t = int let compare = compare end)
 
+module L = List
+
 let readAll = 
   let rec read0 ret = 
     try let u = read_line () in read0 (u :: ret)

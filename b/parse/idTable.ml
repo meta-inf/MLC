@@ -1,12 +1,14 @@
 module IdMap = Map.Make(struct type t = string let compare = compare end)
 
+let builtin2 = ["=="; "="; "+"; "-"; "*"; "/"; ">"; "<"; "$"; "or"; 
+                ":="; "tuple-sel"]
+and builtin1 = ["not"; "ref"; "deref"; "id"; "disp"; "dispi"; "match_failure"]
+
 let (tbl, tbl_orig) =
   let tbl_real = List.fold_left 
       (fun ev id -> IdMap.add id (IdMap.cardinal ev) ev)
       IdMap.empty
-      ["=="; "="; "+"; "-"; "*"; "/"; ">"; "<"; "$";
-       "not"; "or"; "ref"; ":="; "deref"; 
-       "tuple-sel"; "id"; "disp"; "dispi"; "match_failure"]
+      (builtin2 @ builtin1)
   in (ref tbl_real, tbl_real)
 
 let findOrAdd str =
@@ -25,4 +27,8 @@ let str_of_id =
   fun id ->
     try (true, List.assoc id lst)
     with Not_found -> (false, "")
+
+let paramcnt =
+  (List.map (fun s -> (find s, 2)) builtin2) @ 
+  (List.map (fun s -> (find s, 1)) builtin1)
 

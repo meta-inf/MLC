@@ -6,7 +6,7 @@ type expr =
   | Identifier of int
   | Cond of (expr * expr) list
   | Lambda of (int list) * expr
-  | FunApp of expr * expr (* general functions *)
+  | FunApp of expr * (expr list) (* general functions *)
   | FunApp1 of int * expr (* general functions *)
   | FunApp2 of int * expr * expr (* bulitin binary operations *)
   | Let of (int * expr) list * expr

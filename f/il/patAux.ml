@@ -35,8 +35,8 @@ let eqvAValue av id =
     | AFloat i -> IAst.FltConst i
     | ALabel s -> IAst.IntConst (Env.findOrAdd s)
   in
-  IAst.FunApp (IAst.FunApp (IAst.Identifier "==", iv), 
-               IAst.Identifier id)
+  IAst.FunApp (IAst.FunApp (IAst.Identifier "==", [iv]), 
+               [IAst.Identifier id])
 
 
 module PE =
@@ -53,7 +53,7 @@ struct
   let rec get_path (path: access_path) ((id, e, root): t) =
     let pname = sprintf "m/%d/%s" id (String.concat "" @@ List.rev_map string_of_int path)
     and tuplesel a b = 
-      IAst.(FunApp (FunApp (Identifier "tuple-sel", IntConst a), b))
+      IAst.(FunApp (FunApp (Identifier "tuple-sel", [IntConst a]), [b]))
     in
     if path = [] then
       ((id, e, root), Afx.id, root) 
@@ -127,7 +127,7 @@ struct
   let match_failure e = 
     begin
       e.mayfail <- true;
-      IAst.(FunApp (Identifier "match_failure", IntConst e.id))
+      IAst.(FunApp (Identifier "match_failure", [IntConst e.id]))
     end
 
   let mscall (caller, callee) =
@@ -136,7 +136,7 @@ struct
       if callee = [] then [IAst.IntConst 0] 
       else callee |> L.map (fun x -> IAst.Identifier x)
     in
-    List.fold_left (fun res cur -> IAst.FunApp (res, cur)) caller callee
+    List.fold_left (fun res cur -> IAst.FunApp (res, [cur])) caller callee
 
   let match_success i pe ie = 
     let names, _, tf =

@@ -35,23 +35,23 @@ expr:	  INTNUM		{ Ast.IntConst $1 }
 lambdaHead:	  LBRACKET LAMBDA LBRACKET IDENTIFIER { [$4] }
 	| lambdaHead IDENTIFIER	{ $1 @ [$2] }
 
-funAppList:     LBRACKET expr expr	{ Ast.FunApp ($2, $3) }
-	| funAppList expr	{ Ast.FunApp ($1, $2) }
+funAppList:       LBRACKET expr expr	{ Ast.FunApp ($2, [$3]) }
+	| funAppList expr	{ Ast.FunApp ($1, [$2]) }
 ;
 
-tuplelist:	LBRACKET TUPLE		{ [] }
+tuplelist:	  LBRACKET TUPLE		{ [] }
 	| tuplelist expr	{ List.append $1 [$2] }
 ;
 
-condlist:	LBRACKET COND		{ [] }
+condlist:	  LBRACKET COND		{ [] }
                 | condlist LBRACKET expr expr RBRACKET	{ $1 @ [($3, $4)] }
 ;
 
-letbindings:	LET LBRACKET		{ [] }
+letbindings:	  LET LBRACKET		{ [] }
                 | letbindings LBRACKET IDENTIFIER expr RBRACKET { $1 @ [($3, $4)] }
 ;
 
-letrecbindings:	LETREC LBRACKET		{ [] }
+letrecbindings:	  LETREC LBRACKET		{ [] }
                 | letrecbindings LBRACKET IDENTIFIER expr RBRACKET { $1 @ [($3, $4)] }
 ;
 
