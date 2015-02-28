@@ -1,6 +1,7 @@
 (* value type for interpreter *)
 
 exception Runtime_exn of string
+exception Unbounded of int * string
 
 module IntMap = Map.Make(struct type t = int let compare = compare end)
 
@@ -97,10 +98,12 @@ let builtinFuncList =
 module Table =
 struct
   let find var env =
-    match (IntMap.find var env) with
-    | (va, NormalV) -> va
-    | (Func(id, body, _), RecV) -> Func(id, body, env)
-    | (other, RecV) -> other
+    try
+      match (IntMap.find var env) with
+      | (va, NormalV) -> va
+      | (Func(id, body, _), RecV) -> Func(id, body, env)
+      | (other, RecV) -> other
+    with Not_found -> raise @@ Unbounded (var, snd @@ Parse.IdTable.str_of_id_cus var)
   (* `letrec f = let p = 2 in function -> ...` is not supported *)
   let add id value env = 
     IntMap.add id (value, NormalV) env 

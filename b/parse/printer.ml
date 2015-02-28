@@ -50,17 +50,17 @@ let rec printAstT t = match t with
       printAstT value;
       printf ")";
     end
-  | Let (lst, value) -> begin
-      printf "(let (";
+  | Let (id, value, k) -> begin
+      printf "(let ";
       let pfunc (id, value) =
         begin
           printf "(v%d " id;
           printAstT value;
           printf ")";
         end
-      in printList pfunc lst;
-      printf ") ";
-      printAstT value;
+      in pfunc (id, value);
+      printf " ";
+      printAstT k;
       printf ")";
     end
   | LetRec (lst, value) -> begin

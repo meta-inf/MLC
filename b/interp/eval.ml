@@ -41,18 +41,10 @@ and letRecCont lst body env refs cont =
        let env' = Table.add_r id value env in
        eval valexpr' env' refs (letRecCont ret body env' refs cont))
 
-and letCont lst body kvpairs env refs cont =
-  match lst with
-  | [] -> failwith "let - empty binding"
-  | (id, _) :: [] -> (* roll up envtable and go to body *)
-    (fun value -> 
-       let env' = List.fold_left
-           (fun curenv kvpar -> Table.add (fst kvpar) (snd kvpar) curenv)
-           (Table.add id value env) kvpairs
-       in eval body env' refs cont)
-  | (id, _) :: (((_, valexpr') :: _) as ret) ->
-    (fun value -> 
-       eval valexpr' env refs (letCont ret body ((id, value) :: kvpairs) env refs cont))
+and letCont id body env refs cont =
+  (fun value -> 
+     let env' = Table.add id value env
+     in eval body env' refs cont)
 
 and tupleCont exprlst valuelst env refs cont =
   match exprlst with (* 我以为... 实际上... *)
@@ -92,12 +84,13 @@ and eval expr env refs cont =
   (* letrec: will raise "identifier-not-found" on `letrec a = a + 5`. *)
   | LetRec (lst, body) ->
     eval (snd @@ List.hd lst) env refs (letRecCont lst body env refs cont)
-  | Let (lst, body) ->
-    eval (snd @@ List.hd lst) env refs (letCont lst body [] env refs cont)
+  | Let (id, value, body) ->
+    eval value env refs (letCont id body env refs cont)
   | Tuple lst ->
     eval (List.hd lst) env refs (tupleCont lst [] env refs cont)
 ;;
 
+(* force currying *)
 let rec simplify e = 
   match e with
   | IntConst _ | FltConst _ | BoolConst _ | StrConst _ | Identifier _ -> e
@@ -109,8 +102,8 @@ let rec simplify e =
   | FunApp (s, e :: rst) -> simplify (FunApp (FunApp (s, [e]), rst))
   | FunApp1 (i, e) -> FunApp1 (i, simplify e)
   | FunApp2 (i, a, b) -> FunApp2 (i, simplify a, simplify b)
-  | Let (lst, k) -> 
-    Let (List.map (fun (i, e) -> (i, simplify e)) lst, simplify k)
+  | Let (id, value, k) -> 
+    Let (id, simplify value, simplify k)
   | LetRec (lst, k) -> 
     LetRec (List.map (fun (i, e) -> (i, simplify e)) lst, simplify k)
   | Tuple lst -> Tuple (List.map simplify lst)

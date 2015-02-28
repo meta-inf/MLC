@@ -40,16 +40,9 @@ let rec rename0 expr env =
           let (i', e') = IDSet.getNewID i e in (i' :: l, e')) 
         ([], env) ids 
     in Lambda (List.rev ids', rename0 vl e')
-  | Let (bnd, v) -> 
-    let rec bnd0 = List.map (fun (id, vl) -> (id, rename0 vl env)) bnd
-    and getbnd1 bnd env res = 
-      match bnd with
-      | [] -> (env, List.rev res)
-      | (id, vl) :: ret ->
-        let (id', e') = IDSet.getNewID id env
-        in getbnd1 ret e' ((id', vl) :: res)
-    in let (e', bnd') = getbnd1 bnd0 env []
-    in Let (bnd', rename0 v e')
+  | Let (id, value, k) -> 
+    let (id', e') = IDSet.getNewID id env in
+    Let (id', rename0 value env, rename0 k e')
   | LetRec (bnd, v) -> 
     let e' = 
       List.fold_left (fun mp (id, _) -> snd @@ IDSet.getNewID id mp) env bnd

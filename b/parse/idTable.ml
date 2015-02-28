@@ -28,6 +28,12 @@ let str_of_id =
     try (true, List.assoc id lst)
     with Not_found -> (false, "")
 
+let str_of_id_cus = 
+  let lst = List.map (fun (x, y) -> (y, x)) @@ (IdMap.bindings !tbl) in
+  fun id ->
+    try (true, List.assoc id lst)
+    with Not_found -> (false, "(not found)")
+
 let paramcnt =
   (List.map (fun s -> (find s, 2)) builtin2) @ 
   (List.map (fun s -> (find s, 1)) builtin1)

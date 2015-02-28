@@ -78,9 +78,8 @@ let rec trans0 (exp: Ast.expr) (ct: int ref) (k: dexp) =
     let imp0 = DTuple(List.map snd vlst, k) in
     List.fold_right (fun (e, i) impl -> trans e (DExp(i, impl))) vlst imp0
 
-  | Ast.Let ((id, vl) :: rest, body) ->
-    trans vl (DExp (ID id, trans (Ast.Let (rest, body)) k))
-  | Ast.Let ([], body) -> trans body k
+  | Ast.Let (id, vl, body) ->
+    trans vl (DExp (ID id, trans body k))
 
   | Ast.FunApp (f, v) -> 
     let DExp (kvi, kimpl) = k in
@@ -88,9 +87,9 @@ let rec trans0 (exp: Ast.expr) (ct: int ref) (k: dexp) =
     let vi = List.map (fun e -> (e, C.get ct)) v in
     let vcont = 
       List.fold_right 
-        (fun sum (ce, cid) -> trans ce @@ DExp (cid, sum))
+        (fun (ce, cid) sum -> trans ce @@ DExp (cid, sum))
         vi
-        DFunApp (fi, (List.map snd vi) @ [ki])
+        @@ DFunApp (fi, (List.map snd vi) @ [ki])
     in
     DFix ([(ki, [kvi], kimpl)], trans f @@ DExp (fi, vcont))
 

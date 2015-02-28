@@ -12,6 +12,6 @@ let test_r0 str = Eval.interp (Parse_debug.parse1 str)
 let () =
   let prog = readAll () in
   let ctime = (Unix.times ()).tms_utime in
-  let ret = test_r0 prog in
+  let _ = test_r0 prog in
   let ctime' = (Unix.times ()).tms_utime in
   Printf.printf "\nExn time = @%.3f\n" (ctime' -. ctime)

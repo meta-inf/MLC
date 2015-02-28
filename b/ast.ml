@@ -9,7 +9,7 @@ type expr =
   | FunApp of expr * (expr list) (* general functions *)
   | FunApp1 of int * expr (* general functions *)
   | FunApp2 of int * expr * expr (* bulitin binary operations *)
-  | Let of (int * expr) list * expr
+  | Let of int * expr * expr
   | LetRec of (int * expr) list * expr
   | Tuple of (expr list)
 ;;

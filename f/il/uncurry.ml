@@ -68,21 +68,35 @@ and uncurry1 env expr =
   let not_primitive id = 
     not (Env.is_primitive id) || (L.length (L.filter (fun (a, b) -> a = id) env) > 1)
   in
+  let rec expandFunApp (f, a) =
+    match a with
+    | b :: [] -> FunApp (f, [b])
+    | b :: rs -> expandFunApp (FunApp (f, [b]), rs)
+    | [] -> failwith "eFA"
+  in
+  let uc1_let env expr = (* preserve multi-param *)
+    match expr with
+    | Lambda (ids, exp) -> 
+      let env' = L.fold_left (fun a b -> (b, 1) :: a) env ids in
+      Lambda (ids, uncurry1 env' exp)
+    | _ -> uncurry1 env expr
+  in
   match expr with
   | IntConst _ | FltConst _ | BoolConst _ | StrConst _ | Identifier _ -> expr
 
   | FunApp (s, lst) ->
     let lst = L.map (uncurry1 env) lst in (
-    match s with
+    match uncurry1 env s with
     | Identifier id 
       when ((find id) = (L.length lst)) && (find id > 1) && (not_primitive id)
       -> FunApp (Identifier (id ^ "$"), lst)
-    | _ ->
-      FunApp (uncurry1 env s, lst))
+    | Identifier id when not (not_primitive id) ->
+      FunApp (Identifier id, lst)
+    | ot -> expandFunApp (ot, lst))
 
-  | Lambda (ids, exp) -> 
+  | Lambda (ids, exp) ->
     let env' = L.fold_left (fun a b -> (b, 1) :: a) env ids in
-    Lambda (ids, uncurry1 env' exp)
+    List.fold_right (fun id e -> Lambda ([id], e)) ids (uncurry1 env' exp)
 
   | Cond lst -> Cond (L.map (fun (x, y) -> (uncurry1 env x, uncurry1 env y)) lst)
 
@@ -97,7 +111,7 @@ and uncurry1 env expr =
     in
     let bnds = 
       L.concat @@
-      L.map (fun (i, e) -> expandBnd (i, uncurry1 env' e)) lst
+      L.map (fun (i, e) -> expandBnd (i, uc1_let env' e)) lst
     in LetRec (bnds, uncurry1 env' body)
 
   | Let (lst, body) -> (* treating as nested *)
@@ -108,7 +122,7 @@ and uncurry1 env expr =
              match exp with
              | Lambda (lst, _) -> (id, L.length lst) :: env
              | _ -> env
-           in (bnds @ (expandBnd (id, uncurry1 env exp)), env'))
+           in (bnds @ (expandBnd (id, uc1_let env exp)), env'))
         ([], env) lst
     in
     Let (lst', uncurry1 env' body)

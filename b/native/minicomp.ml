@@ -1,5 +1,5 @@
 let compileWithIR (r: Ast.expr) =
-  let r = Interp.Eval.simplify r in (* Cps doesn't yet support nested lambda *)
+(*let r = Interp.Eval.simplify r in *)
   let r = Prep.rename r in (* rename nested let *)
   let s = Cps.trans r in (* -> dexpr *)
   let t = Reduce.reduce s in (* -> cexpr *)
