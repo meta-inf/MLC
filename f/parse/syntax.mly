@@ -6,7 +6,7 @@ open ParseAux
 
 %token TYPE OF MATCH WITH AS AND LET REC FUNC IN IF THEN ELSE BEGIN END LISTCONS
 %token LPAREN RPAREN LBRAC RBRAC SEMICOLON ARROW EOF COMMA EQUAL VERTBAR 
-%token<string> LID UID TID OP0 OP1 OP2 OP3 STRCONST
+%token<string> LID UID TID OP0 OP1 OP2 OP3 OP4 STRCONST
 %token<int> INTNUM
 %token<float> FLOATNUM
 
@@ -19,13 +19,14 @@ open ParseAux
 %left VERTBAR
 %nonassoc AS
 %right ARROW (* a -> b -> c *) 
+%right OP0
 %left COMMA
-%left EQUAL OP0
+%left EQUAL OP1
 %right LISTCONS
-%right OP1
-%left OP2
+%right OP2
 %left OP3
-%nonassoc LPAREN LBRAC LID INTNUM FLOATNUM BEGIN UID
+%left OP4
+%nonassoc LPAREN LBRAC LID INTNUM FLOATNUM STRCONST BEGIN UID
 
 %start prog
 %type <Ast.stmt list> prog
@@ -62,6 +63,7 @@ stmt:	expr SEMICOLON	{ Expr $1 }
 |	_op = OP1	{ _op }
 |	_op = OP2	{ _op }
 |	_op = OP3	{ _op }
+|	_op = OP4	{ _op }
 ;
 
 expr:	atom_expr	{ $1 }

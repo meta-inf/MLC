@@ -34,7 +34,7 @@ let tests = [|
 		((v (ref 0))) 
 		(let ((acc (fun (x) 
 					(let 
-					 ((dum (set-ref v (+ (deref v) 1)) ))
+					 ((dum (:= v (+ (deref v) 1)) ))
 					 (deref v)
 					 ))))
 		 acc))))

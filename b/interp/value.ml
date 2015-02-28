@@ -63,7 +63,7 @@ let builtinBinOps =
    ("tuple-sel", PureBF (fun x y -> match (y, x) with 
         | (Tuple arr, IntVal k) -> arr.(k)
         | _ -> failwith "tuple-sel: invalid type"));
-   ("set-ref", ImpureBF (fun x y vtable -> match x with
+   (":=", ImpureBF (fun x y vtable -> match x with
         | RefVal id -> (RefTable.modify id y vtable; Unit)
         | _ -> failwith "set-ref: not a reference"))
   ]

@@ -185,8 +185,8 @@ and genPrimOp2 id dst p1 p2 rmap =
                    AD.(op2 "and" (toAS @@ fromMV dst) "r14") ]
                 else [])
     | _ -> raise @@ Invalid_argument "tuple-sel: invalid operand")
-  | "set-ref" -> [AD.op2 "movshr" "r14" (v2s p1);
-                  AD.(_mov (M "[r14 + 8]") (fromMV p2))]
+  | ":=" -> [AD.op2 "movshr" "r14" (v2s p1);
+             AD.(_mov (M "[r14 + 8]") (fromMV p2))]
   | _ -> raise Not_found;
 
 and genCond =

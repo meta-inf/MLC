@@ -5,7 +5,7 @@ let (tbl, tbl_orig) =
       (fun ev id -> IdMap.add id (IdMap.cardinal ev) ev)
       IdMap.empty
       ["=="; "="; "+"; "-"; "*"; "/"; ">"; "<"; "$";
-       "not"; "or"; "ref"; "set-ref"; "deref"; 
+       "not"; "or"; "ref"; ":="; "deref"; 
        "tuple-sel"; "id"; "disp"; "dispi"; "match_failure"]
   in (ref tbl_real, tbl_real)
 

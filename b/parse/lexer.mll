@@ -3,7 +3,7 @@ open Parser
 open IdTable
 }
 let digit = ['0'-'9']
-let idbeg = ['a'-'z' 'A'-'Z' '_' '=' '+' '-' '*' '/' '>' '<' '$']
+let idbeg = ['a'-'z' 'A'-'Z' '_' '=' '+' '-' '*' '/' '>' '<' '$' ':']
 let idnorm = idbeg | ['0'-'9' '\'']
 let char_ = [^'\n' '"']
 

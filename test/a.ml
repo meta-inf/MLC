@@ -1,4 +1,10 @@
-let fst (x, y) = x;
+type 'a option = None | Some of 'a;
 
-fst (2, 3);
+let u = ref None;
+
+u := Some 2;
+(fun (Some x) -> dispi x) $ deref u;
+
+u := None;
+
 

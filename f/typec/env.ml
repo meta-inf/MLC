@@ -32,6 +32,9 @@ struct
     |> _extends ["dispi"] ([], TFunc (TInt, TUnit))
     |> _extends ["disp"] ([], TFunc (TStr, TUnit))
     |> _extends ["$"] ([1; 2], TFunc (TFunc (TVar 1, TVar 2), TFunc (TVar 1, TVar 2)))
+    |> _extends ["ref"] ([1], TFunc (TVar 1, TAlType ("ref", [TVar 1])))
+    |> _extends ["deref"] ([1], TFunc (TAlType ("ref", [TVar 1]), TVar 1))
+    |> _extends [":="] ([1], TFunc (TAlType ("ref", [TVar 1]), TFunc (TVar 1, TUnit)))
 end
 
 

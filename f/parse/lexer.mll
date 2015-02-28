@@ -30,17 +30,17 @@ rule token = parse
 | '|'	{ VERTBAR }
 | "::"  { LISTCONS }
 | "->"	{ ARROW }
-
+| ":=" as op { OP0 op }
 | ['<' '>'] idbody* as op	
-	{ OP0 op }
+	{ OP1 op }
 | "=="
-	{ OP0 "==" }
+	{ OP1 "==" }
 | ['$'] idbody* as op
-        { OP1 op }
+        { OP2 op }
 | ['+' '-'] idbody* as op	
-	{ OP2 op }
-| ['*' '/'] idbody* as op
 	{ OP3 op }
+| ['*' '/'] idbody* as op
+	{ OP4 op }
 
 | "\"" char_+ "\"" as str
 	{ STRCONST (String.sub str 1 (String.length str - 2)) }

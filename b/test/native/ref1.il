@@ -3,7 +3,7 @@
 	((v (ref 0)))
 	(fun (x) 
 	 (let
-	  ((dummy (set-ref v (+ 1 (deref v)))))
+	  ((dummy (:= v (+ 1 (deref v)))))
 	  (deref v))))))
  (letrec
   ((test1 (fun (x)
