@@ -15,30 +15,56 @@ void match_failure (int a)
 	exit(1);
 }
 
-int equiv (qword a, qword b)
+int polyCMP (qword a, qword b)
 {
-	qword header, *x, *y;
+	qword *x, *y;
 	int len, i;
-	if (!(a & 1) || !(b & 1))
+
+	if (!(a & 1))
 	{
-		return a == b;
+		return (long)a < (long)b ? 2 : a == b ? 1 : 0;
 	}
+
 	x = (qword*) (a >> 1);
 	y = (qword*) (b >> 1);
-
+	
 	if (x[0] != y[0])
 	{
-		return 0;
+#define msk ((1ULL << 48) - 1)
+		int a, b;
+		a = x[0] & msk, b = y[0] & msk;
+		return a < b ? 2 : 0;
 	}
-	len = x[0] >> 48; /* TODO: only tuples are considered. */
+
+	len = x[0] >> 48;
 	for (i = 1; i < len; ++i)
 	{
-		if (!equiv (x[i], y[i]))
+		int t = polyCMP(x[i], y[i]);
+		if (t != 1)
 		{
-			return 0;
+			return t;
 		}
 	}
-	return 2;
+
+	return 1;
+}
+
+int polyLT (qword a, qword b)
+{
+	if (!(a & 1))
+	{
+		return ((long)a < (long)b) << 1;
+	}
+	return polyCMP(a, b) == 2;
+}
+
+int equiv (qword a, qword b)
+{
+	if (!(a & 1))
+	{
+		return (a == b) << 1;
+	}
+	return polyCMP(a, b) == 1;
 }
 
 void gc_check (qword size)

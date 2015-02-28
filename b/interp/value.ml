@@ -53,6 +53,8 @@ let identical x y =
 let builtinBinOps = 
   [("=", PureBF (fun x y -> BoolVal (x = y)));
    ("==", PureBF (fun x y -> BoolVal (identical x y)));
+   ("<", PureBF (fun x y -> BoolVal (x < y)));
+   (">", PureBF (fun x y -> BoolVal (y < x)));
    ("+", PureBF (fun x y -> IntVal ((v2i x) + (v2i y))));
    ("-", PureBF (fun x y -> IntVal ((v2i x) - (v2i y))));
    ("*", PureBF (fun x y -> IntVal ((v2i x) * (v2i y))));

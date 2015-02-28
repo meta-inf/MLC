@@ -75,7 +75,7 @@ let collectAlias: pattern -> (access_path * string) list =
     | (PInt _ | PFloat _) -> []
     | PVar s -> [path, s]
     | PTuple l -> 
-      let lst = L.mapi (fun i e -> trav (i :: path) e) l in
+      let lst = L.mapi (fun i e -> trav ((i + 1) :: path) e) l in
       L.concat lst
     | PAlType (s, l) -> 
       let lst = L.mapi (fun i e -> trav ((i + 1) :: path) e) l in
@@ -141,7 +141,7 @@ struct
       L.fold_left 
         (fun (names, pe, tf) path -> 
            let (pe', tf', name) = PE.get_path path pe in
-           (names @ [IAst.Identifier name], pe', fun e -> tf' (tf e)))
+           (names @ [IAst.Identifier name], pe', fun e -> tf (tf' e)))
         ([], pe, fun x -> x)
         (List.nth ie.param i)
     in

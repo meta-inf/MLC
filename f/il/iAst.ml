@@ -63,9 +63,9 @@ and vprint t =
       printf "(cond";
       let pfunc i (cond, exp) =
         begin
-          printf " (";
+          printf "\n(";
           vprint cond;
-          printf " ";
+          printf "\n";
           vprint exp;
           printf ")";
         end
@@ -76,35 +76,35 @@ and vprint t =
     (printf "("; vprint func; printf " "; vprint param; printf ")")
 
   | Lambda (ids, value) -> begin
-      printf "(fun (%s) " (String.concat " " ids);
+      printf "(fun (%s)\n" (String.concat " " ids);
       vprint value;
       printf ")";
     end
   | Let (lst, value) -> begin
-      printf "(let (";
+      printf "(let \n(";
       let pfunc i (id, value) =
         begin
-          if i > 0 then printf " ";
+          if i > 0 then printf "\n";
           printf "(%s " id;
           vprint value;
           printf ")";
         end
       in List.iteri pfunc lst;
-      printf ") ";
+      printf ")\n";
       vprint value;
       printf ")";
     end
   | LetRec (lst, value) -> begin
-      printf "(letrec (";
+      printf "(letrec \n(";
       let pfunc i (id, value) =
         begin
-          if i > 0 then printf " ";
+          if i > 0 then printf "\n";
           printf "(%s " id;
           vprint value;
           printf ")";
         end
       in List.iteri pfunc lst;
-      printf ") ";
+      printf ")\n";
       vprint value;
       printf ")";
     end
@@ -124,16 +124,16 @@ and vprint t =
       (List.hd l1, List.rev (List.tl l1))
     in
     begin
-      printf "(let (";
+      printf "(let \n(";
       let pfunc i v =
         begin
-          if i > 0 then printf " ";
+          if i > 0 then printf "\n";
           printf "(_ ";
           vprint v;
           printf ")";
         end
       in List.iteri pfunc rst;
-      printf ") ";
+      printf ")\n";
       vprint tl;
       printf ")";
     end

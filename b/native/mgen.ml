@@ -173,6 +173,8 @@ and genPrimOp2 id dst p1 p2 rmap =
             AD.op1 "setz"  (l8bit dst);
             AD.op2 "movzx" (v2s dst) (l8bit dst)];)
   | "=" -> genExternCall "equiv" [p1; p2] rmap dst false
+  | "<" -> genExternCall "polyLT" [p1; p2] rmap dst false
+  | ">" -> genExternCall "polyLT" [p2; p1] rmap dst false
   | "tuple-sel" -> ( 
     match p1 with
     | Imm d -> [AD.op2 "movshr" "r14" (v2s p2);
@@ -321,7 +323,8 @@ let mgen ((strmap, fix): RM.t Prog.t) =
                genDataSection strmap;
                ["\nsection .text\n";
                 "global\tmain";
-                "extern\tdisp, make_tuple, dispi, heap_init, gc_check, equiv, match_failure"];
+                "extern\tdisp, make_tuple, dispi, heap_init, gc_check, \
+                 polyLT, equiv, match_failure"];
                List.concat @@ List.map genFuncBody fix;
               ]
 

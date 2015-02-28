@@ -10,7 +10,7 @@ let collectTrait: Ast.pattern -> trait list =
     | PInt i -> ret := TNode (pre, loc, AInt i) :: !ret
     | PFloat f -> ret := TNode (pre, loc, AFloat f) :: !ret
     | PTuple lst -> 
-      L.iteri (fun i sub -> trav sub ret pre (i :: loc)) lst
+      L.iteri (fun i sub -> trav sub ret pre ((i + 1) :: loc)) lst
     | PAlType (s, lst) ->
       let pre' = TNode (pre, 0 :: loc, ALabel s) in
       begin
@@ -120,17 +120,18 @@ let translate: string -> (Ast.pattern * IAst.iexpr) list -> IAst.iexpr =
         let pid = L.hd cpat in
         let (traits, _) = L.nth pat pid in
         let unchecked = L.filter (fun x -> not (L.mem x checked)) traits in
-        let _, ret = 
+        let penv', tf = 
           L.fold_right 
-            (fun cur (penv, ans) ->
+            (fun cur (penv, tf) ->
                let TNode (_, path, aval) = cur in
-               let penv', tf, pathS = PE.get_path path penv in
+               let penv', tf0, pathS = PE.get_path path penv in
                (penv', 
-                tf @@ 
-                IAst.(makeIf (eqvAValue aval pathS, ans, IE.match_failure ienv))))
+                fun e -> tf @@ tf0 @@ IAst.(makeIf (eqvAValue aval pathS, 
+                                                    e, 
+                                                    IE.match_failure ienv))))
             unchecked
-            (penv, IE.match_success pid penv ienv)
-        in ret
+            (penv, Afx.id)
+        in tf (IE.match_success pid penv' ienv)
 
       else
         let (pack, Pool sons), pool' = getTrait lst cpat in

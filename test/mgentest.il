@@ -1,1 +1,0 @@
-(let ((b2i (fun (x) (cond (x 1) (#t 0))))) (let ((_ (dispi (b2i ((== 2) 3))))) (let ((_ (let ((f (fun (x) (let ((_ (dispi (b2i ((== 2) x))))) (dispi (b2i ((== x) 2))))))) (let ((_ (f 3))) (f 2))))) 0)))

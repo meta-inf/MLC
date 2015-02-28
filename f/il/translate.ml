@@ -21,7 +21,7 @@ and trans0: expr -> iexpr =
     | Ast.FltConst i -> IAst.FltConst i
     | Ast.Var i -> IAst.Identifier i
     | Ast.Tuple ls -> 
-      IAst.Tuple (L.map (trans0) ls)
+      IAst.Tuple ((IAst.IntConst 0) :: (L.map (trans0) ls))
     | Ast.AlType (s, ls) ->
       IAst.Tuple ((IAst.IntConst (Env.findOrAdd s)) :: (L.map trans0 ls))
     | Ast.FunApp (f, v) ->

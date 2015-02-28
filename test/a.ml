@@ -1,3 +1,4 @@
-let rec f x = if x = 0 then 1 else f (x - 1) * x;
+let fst (x, y) = x;
 
-dispi (f 10);
+fst (2, 3);
+
