@@ -85,10 +85,6 @@ let collectAlias: pattern -> (access_path * string) list =
     | POr (x, y) -> trav path x 
   in fun x -> trav [] x
 
-let rec beta exp env =
-  map_e (fun s -> try List.assoc s env with Not_found -> s) exp
-
-
 module IE =
 struct
   type t = { mutable mayfail : bool;
@@ -124,7 +120,7 @@ struct
   let finalize e =
     let bindings = 
       IntSet.elements e.suc 
-      |> List.map (fun i -> (action_id e i, L.nth e.impl i))
+      |> L.map (fun i -> (action_id e i, L.nth e.impl i))
     in 
     fun e -> IAst.Let (bindings, e)
 
