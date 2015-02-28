@@ -13,7 +13,6 @@ Check `test/` for details.
 
 ## TODO
 
-* Decurrying
 * Beta expansion
 * Runtime support for string & array
 * Readable error messages
