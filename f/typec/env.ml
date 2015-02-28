@@ -30,6 +30,8 @@ struct
       ([1], TFunc (TVar 1, TFunc (TAlType ("list", [TVar 1]),
                                   TAlType ("list", [TVar 1]))))
     |> _extends ["dispi"] ([], TFunc (TInt, TUnit))
+    |> _extends ["disp"] ([], TFunc (TStr, TUnit))
+    |> _extends ["$"] ([1; 2], TFunc (TFunc (TVar 1, TVar 2), TFunc (TVar 1, TVar 2)))
 end
 
 
@@ -127,7 +129,7 @@ struct
       let rec trav t =
         let t = expandVar t venv in
         match t with
-        | TInt | TFloat | TBool | TUnit -> t
+        | TInt | TFloat | TStr | TBool | TUnit -> t
         | TVar v -> 
           begin
             if getDep (TVar v) venv == venv.curDep then

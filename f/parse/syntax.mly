@@ -6,7 +6,7 @@ open ParseAux
 
 %token TYPE OF MATCH WITH AS AND LET REC FUNC IN IF THEN ELSE BEGIN END LISTCONS
 %token LPAREN RPAREN LBRAC RBRAC SEMICOLON ARROW EOF COMMA EQUAL VERTBAR 
-%token<string> LID UID TID OP0 OP1 OP2
+%token<string> LID UID TID OP0 OP1 OP2 OP3 STRCONST
 %token<int> INTNUM
 %token<float> FLOATNUM
 
@@ -22,8 +22,9 @@ open ParseAux
 %left COMMA
 %left EQUAL OP0
 %right LISTCONS
-%left OP1
+%right OP1
 %left OP2
+%left OP3
 %nonassoc LPAREN LBRAC LID INTNUM FLOATNUM BEGIN UID
 
 %start prog
@@ -60,6 +61,7 @@ stmt:	expr SEMICOLON	{ Expr $1 }
 |	_op = OP0	{ _op }
 |	_op = OP1	{ _op }
 |	_op = OP2	{ _op }
+|	_op = OP3	{ _op }
 ;
 
 expr:	atom_expr	{ $1 }
@@ -98,8 +100,9 @@ match_clauses:	pattern ARROW expr
 atom_expr:	LID	{ Var $1 }
 |	INTNUM	{ IntConst $1 }
 |	FLOATNUM	{ FltConst $1 }
+|	STRCONST	{ StrConst $1 }
 |	LPAREN o = op RPAREN
-		{ Var o }
+		{ Func ([PVar "a"; PVar "b"], FunApp (FunApp (Var o, Var "a"), Var "b")) }
 |	UID	{ AlType ($1, []) }
 |	LPAREN expr RPAREN
 		{ $2 }
@@ -193,7 +196,13 @@ type_sig:
 ;
 
 atomic_type_sig:
-  TID	{ TVar $1 }
+  TID	{ match $1 with
+	  | "int" -> TInt
+	  | "float" -> TFloat
+	  | "string" -> TStr
+	  | "bool" -> TBool
+	  | "unit" -> TUnit
+	  | _ -> TVar $1 }
 | LPAREN type_sig RPAREN 
 	{ $2 }
 | LPAREN type_sig preceded(COMMA, type_sig)+ RPAREN

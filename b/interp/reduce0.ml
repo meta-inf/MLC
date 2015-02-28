@@ -31,7 +31,11 @@ let binOpFunc =
 let rec reduce0 expr env =
   match expr with
   | FunApp (FunApp (Identifier id, v0), v1)
-    when (IntSet.mem id env) -> FunApp2 (id, reduce0 v0 env, reduce0 v1 env)
+    when (IntSet.mem id env) -> 
+    (* Eval.eval requires `id` be builtinFunc[S] *)
+    if snd @@ Parse.IdTable.str_of_id id = "$" then 
+      reduce0 (FunApp (v0, v1)) env
+    else FunApp2 (id, reduce0 v0 env, reduce0 v1 env)
   | FunApp (Identifier id, v)
     when (IntSet.mem id env) -> FunApp1 (id, reduce0 v env)
   | FunApp (f, v) -> FunApp (reduce0 f env, reduce0 v env)

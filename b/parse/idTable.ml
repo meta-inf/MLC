@@ -4,7 +4,7 @@ let (tbl, tbl_orig) =
   let tbl_real = List.fold_left 
       (fun ev id -> IdMap.add id (IdMap.cardinal ev) ev)
       IdMap.empty
-      ["=="; "="; "+"; "-"; "*"; "/"; ">"; "<";
+      ["=="; "="; "+"; "-"; "*"; "/"; ">"; "<"; "$";
        "not"; "or"; "ref"; "set-ref"; "deref"; 
        "tuple-sel"; "id"; "disp"; "dispi"; "match_failure"]
   in (ref tbl_real, tbl_real)

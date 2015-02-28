@@ -14,7 +14,7 @@ let gensym =
 
 let rec convert_e exp =
   match exp with
-  | IntConst _ | FltConst _ | Var _ -> exp
+  | IntConst _ | FltConst _ | StrConst _ | Var _ -> exp
   | FunApp (f, v) -> FunApp (convert_e f, convert_e v)
   | IfExp (a, b, Some c) -> 
     IfExp (convert_e a, convert_e b, Some (convert_e c))

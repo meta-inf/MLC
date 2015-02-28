@@ -1,6 +1,6 @@
 
 type ('a, 'b) type_tag_b = 
-    TInt | TFloat | TBool | TUnit
+    TInt | TFloat | TStr | TBool | TUnit
   | TVar of 'b
   | TFunc of ('a, 'b) type_tag_b * ('a, 'b) type_tag_b
   | TTuple of ('a, 'b) type_tag_b list
@@ -17,6 +17,7 @@ let rec tag_finalize : instantiated type_tag -> finalized type_tag
   = function
   | TInt -> TInt
   | TFloat -> TFloat
+  | TStr -> TStr
   | TBool -> TBool
   | TUnit -> TUnit
   | TVar v -> TVar v
@@ -28,6 +29,7 @@ let rec tag_instantiate : finalized type_tag -> instantiated type_tag
   = function
   | TInt -> TInt
   | TFloat -> TFloat
+  | TStr -> TStr
   | TBool -> TBool
   | TUnit -> TUnit
   | TVar v -> TVar v
@@ -37,14 +39,14 @@ let rec tag_instantiate : finalized type_tag -> instantiated type_tag
 
 let rec iter_v f tag =
   match tag with
-  | TInt | TFloat | TBool | TUnit -> ()
+  | TInt | TFloat | TStr | TBool | TUnit -> ()
   | TVar v -> f v
   | TFunc (a, b) -> (iter_v f a; iter_v f b)
   | (TTuple lst | TAlType (_, lst)) -> List.iter (iter_v f) lst
 
 let rec map_v f tag =
   match tag with
-  | TInt | TFloat | TBool | TUnit -> tag
+  | TInt | TFloat | TStr | TBool | TUnit -> tag
   | TVar v -> TVar (f v)
   | TFunc (a, b) -> 
     let b', a' = map_v f b, map_v f a in TFunc (a', b') (* preserve order *)

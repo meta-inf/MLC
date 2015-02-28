@@ -282,6 +282,12 @@ let genFuncBody = function
                   "ret"]]
 
 let repString str =
+  let transStr s =
+    let s0 = Scanf.unescaped s in
+    String.concat ", " @@ 
+    List.map (fun c -> string_of_int @@ int_of_char c) @@
+    list_of_string s0
+  in
   let header = print "0574%012x" (String.length str * 2) in
   let h0 = String.concat "" @@ Array.to_list @@ 
       (Array.init 8 
@@ -289,7 +295,7 @@ let repString str =
                                      String.make 1 header.[14 - x * 2];
                                      String.make 1 header.[15 - x * 2];
                                      ", "])) in
-  let ret = print "%s\"%s\", 0" h0 str in
+  let ret = print "%s%s, 0" h0 (transStr str) in
   if String.length str mod 2 = 1 then ret else print "%s, 0" ret
 
 let genDataSection strmap = 

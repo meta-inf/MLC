@@ -4,7 +4,11 @@ let rec map f a =
   | x :: rs -> (f x) :: (map f rs)
 ;
 
-let showlst l = map (fun x -> dispi x) l;
+let showlst l = 
+  begin
+    map (fun x -> begin dispi x; disp " " end) l;
+    disp "\n"
+  end;
 
 showlst [1, 2];
 

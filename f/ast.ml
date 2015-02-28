@@ -12,6 +12,7 @@ type let_label = NonRec | Rec
 type expr = 
     IntConst of int
   | FltConst of float
+  | StrConst of string
   | Var of string
   | Tuple of expr list
   | AlType of string * (expr list)

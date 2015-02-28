@@ -8,7 +8,7 @@ let rec updateSig
     = fun pmap ty ->
       try
         match ty with
-        | TInt | TFloat | TBool | TUnit as ret -> ret
+        | TInt | TFloat | TBool | TUnit | TStr as ret -> ret
         | TVar s -> TVar (List.assoc s pmap)
         | TFunc (a, b) -> TFunc (updateSig pmap a, updateSig pmap b)
         | TTuple lst -> TTuple (List.map (updateSig pmap) lst)

@@ -87,7 +87,9 @@ let builtinFuncList =
    ("deref", BuiltinFuncS
       (fun va vtable -> match va with
          | RefVal id -> RefTable.find id vtable
-         | _ -> failwith "deref: not a reference"))
+         | _ -> failwith "deref: not a reference"));
+   ("$", Func (0, Ast.(Lambda ([1], FunApp (Identifier 0, Identifier 1))), 
+               IntMap.empty)) (* reduceBinOp checked this problem *)
   ] @
   (List.map (function (s, f) -> (s, binOp f)) builtinBinOps)
 

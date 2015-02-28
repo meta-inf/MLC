@@ -30,6 +30,7 @@ let rec string_of_tag t =
   match t with
   | TInt -> "int"
   | TFloat -> "float"
+  | TStr -> "string"
   | TUnit -> "unit"
   | TBool -> "bool"
   | TVar v -> 

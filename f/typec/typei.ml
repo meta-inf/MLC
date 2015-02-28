@@ -35,7 +35,7 @@ let rec unify: 'a type_tag -> 'a type_tag -> V.t -> unit
           b;
       end
     else match (a, b) with
-      | (TInt, TInt) | (TFloat, TFloat) | (TBool, TBool) | (TUnit, TUnit)
+      | (TInt, TInt) | (TFloat, TFloat) | (TStr, TStr) | (TBool, TBool) | (TUnit, TUnit)
         -> ()
       | (TFunc (f1, v1), TFunc (f2, v2)) -> 
         (unify f1 f2 env; unify v1 v2 env)
@@ -56,6 +56,7 @@ let rec typeOf e tenv venv =
   match e with
   | IntConst _ -> TInt
   | FltConst _ -> TFloat
+  | StrConst _ -> TStr
   | Var v -> V.instantiate (T.find v tenv) venv
 
   | FunApp (f, v) ->

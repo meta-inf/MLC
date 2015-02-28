@@ -110,10 +110,10 @@ qword* make_tuple (qword n, ...)
 
 void dispi (int64_t n)
 {
-	printf("%lld\n", n >> 1);
+	printf("%lld", n >> 1);
 }
 
 void disp (qword n)
 {
-	printf("%s\n", (char*)(n >> 1));
+	printf("%s", (char*)(n >> 1));
 }

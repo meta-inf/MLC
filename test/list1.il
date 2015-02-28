@@ -21,8 +21,12 @@
 (match_failure 5)))))))))
 (let 
 ((showlst (fun (l)
-((map (fun (x)
-(dispi x))) l))))
+(let 
+((_ ((map (fun (x)
+(let 
+((_ (dispi x)))
+(disp " ")))) l)))
+(disp "\n")))))
 (let 
 ((_ (showlst (tuple 17 1 (tuple 17 2 (tuple 16))))))
 (letrec 

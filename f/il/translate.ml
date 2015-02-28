@@ -19,6 +19,7 @@ and trans0: expr -> iexpr =
   function
     | Ast.IntConst i -> IAst.IntConst i
     | Ast.FltConst i -> IAst.FltConst i
+    | Ast.StrConst i -> IAst.StrConst i
     | Ast.Var i -> IAst.Identifier i
     | Ast.Tuple ls -> 
       IAst.Tuple ((IAst.IntConst 0) :: (L.map (trans0) ls))
