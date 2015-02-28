@@ -34,10 +34,10 @@ and trans0: expr -> iexpr =
     | Ast.IfExp (cond, br0, None) ->
       IAst.Cond [trans0 cond, trans0 br0]
 
-    | Ast.Let (NonRec, bindings, value) ->
-      IAst.Let (transBnds bindings, trans0 value)
+    | Ast.Let ((pat, v), k) ->
+      trans0 (Ast.MatchExp (v, [pat, k]))
 
-    | Ast.Let (Rec, bindings, value) ->
+    | Ast.LetRec (bindings, value) ->
       IAst.LetRec (transBnds bindings, trans0 value)
 
     | Ast.MatchExp (exp, patterns) -> (
@@ -56,9 +56,10 @@ let translate stmts =
     match a with
     | AlTypeDecl _ -> b
     | Expr e -> IAst.Seq [trans0 e; b]
-    | GLetExp (Let (NonRec, bnd, _)) -> 
-      IAst.Let (transBnds bnd, b)
-    | GLetExp (Let (Rec, bnd, _)) -> 
+    | GLetExp (Let ((p, v), _)) -> 
+      let nid = newID () in
+      IAst.Let ([nid, trans0 v], Patcomp.translate nid [p, b])
+    | GLetExp (LetRec (bnd, _)) -> 
       IAst.LetRec (transBnds bnd, b)
     | _ -> failwith ""
   in Uncurry.uncurry @@ L.fold_right aux stmts (IAst.IntConst 0)

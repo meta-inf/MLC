@@ -40,11 +40,11 @@ let rec unify: 'a type_tag -> 'a type_tag -> V.t -> unit
       | (TFunc (f1, v1), TFunc (f2, v2)) -> 
         (unify f1 f2 env; unify v1 v2 env)
       | (TTuple l1, TTuple l2) 
-        when (List.length l1) = (List.length l2) -> 
-        List.iter (fun (a, b) -> unify a b env) (List.combine l1 l2)
+        when (L.length l1) = (L.length l2) -> 
+        L.iter (fun (a, b) -> unify a b env) (L.combine l1 l2)
       | (TAlType (a1, l1), TAlType (a2, l2))
-        when (a1 = a2) && ((List.length l1) = (List.length l2)) ->
-        List.iter (fun (a, b) -> unify a b env) (List.combine l1 l2)
+        when (a1 = a2) && ((L.length l1) = (L.length l2)) ->
+        L.iter (fun (a, b) -> unify a b env) (L.combine l1 l2)
       | _ -> raise @@ Type_error Unification_error
 
 
@@ -72,19 +72,45 @@ let rec typeOf e tenv venv =
     let te = typeOf e tenv' venv in
     TFunc (tv, te)
 
-  | Let (lbl, [(x, [], v)], e) ->
+  | Let ((pat, v), e) ->
     begin
       V.createFrame venv;
-      let tx = match lbl with
-        | NonRec -> typeOf v tenv venv 
-        | Rec -> 
-          let tx0 = V.newVar venv in
-          let te' = T.extend x (V.makeSig tx0) tenv in
-          let tx1 = typeOf v te' venv in
-          begin
-            unify tx1 tx0 venv;
-            tx0
-          end
+      let tx = typeOf v tenv venv in
+      let tenv', tpat = loadPattern pat tenv venv in
+      let tlst = Il.PatAux.collectAlias pat |> L.map snd in
+      let tlst = 
+      begin
+        unify tpat tx venv;
+        L.map 
+          (fun s -> 
+             let si = T.find s tenv' 
+             in (assert((fst si) = []); (s, V.instantiate si venv)))
+          tlst;
+      end
+      in
+      let tenv_f = 
+        if isRValue v then
+          let siglst = tlst |> L.map (fun (s, t) -> (s, V.finalize t venv)) in
+          L.fold_left (fun e (s, t) -> T.extend s t e) tenv siglst
+        else tenv'
+      in
+      begin
+        V.exitFrame venv;
+        typeOf e tenv_f venv
+      end
+    end
+
+  | LetRec ([(x, [], v)], e) ->
+    begin
+      V.createFrame venv;
+      let tx =
+        let tx0 = V.newVar venv in
+        let te' = T.extend x (V.makeSig tx0) tenv in
+        let tx1 = typeOf v te' venv in
+        begin
+          unify tx1 tx0 venv;
+          tx0
+        end
       in
       let tx = 
         if isRValue v then (V.finalize tx venv) else V.makeSig tx in
@@ -96,7 +122,7 @@ let rec typeOf e tenv venv =
     end
 
   | Tuple lst ->
-    TTuple (List.map (fun e -> typeOf e tenv venv) lst)
+    TTuple (L.map (fun e -> typeOf e tenv venv) lst)
 
   | AlType (id, lst) ->
     let id = T.variantIDOf id in (
@@ -109,7 +135,7 @@ let rec typeOf e tenv venv =
     let e_t = typeOf e tenv venv in
     let r_t = V.newVar venv in
     begin
-      List.iter 
+      L.iter 
         (fun (pat, exp) ->
            let (tenv', pat_t) = loadPattern pat tenv venv in
            let exp_t = typeOf exp tenv' venv in
@@ -135,42 +161,43 @@ let rec typeOf e tenv venv =
     end
 
   | Grouped lst ->
-    let types = List.map (fun x -> typeOf x tenv venv) lst in
-    List.hd (List.rev types)
+    let types = L.map (fun x -> typeOf x tenv venv) lst in
+    L.hd (L.rev types)
 
   | _ -> raise Not_implemented
 
-and loadPattern pat tenv venv =
-  let varlist = varListOfPat pat in (* check variable validity *)
-  let tref = ref tenv in
-  begin
-    List.iter (* allocate type variables *)
-      (fun s -> 
-         let si = V.makeSig @@ V.newVar venv in
-         tref := T.extend s si !tref)
-      varlist;
-    (!tref, typeOfPat pat !tref venv) (* typing *)
-  end
+and loadPattern: Ast.pattern -> T.t -> V.t -> (T.t * (instantiated type_tag))
+  = fun pat tenv venv ->
+    let varlist = varListOfPat pat in (* check variable validity *)
+    let tref = ref tenv in
+    begin
+      L.iter (* allocate type variables *)
+        (fun s -> 
+           let si = V.makeSig @@ V.newVar venv in
+           tref := T.extend s si !tref)
+        varlist;
+      (!tref, typeOfPat pat !tref venv) (* typing *)
+    end
 
 and varListOfPat = 
   let rec trav = function
     | PInt _ | PFloat _ -> []
     | PVar s -> [s]
-    | PTuple lst | PAlType (_, lst) -> List.concat (List.map trav lst)
+    | PTuple lst | PAlType (_, lst) -> L.concat (L.map trav lst)
     | PAlias (s, p) -> s :: (trav p)
     | POr (x, y) ->
       let vx = varListOfPat x in
       let vy = varListOfPat y in
       if not (vx = vy) then raise @@ Type_error Invalid_POR
       else vx
-  in fun p -> let ret = trav p in List.sort_uniq compare ret
+  in fun p -> let ret = trav p in L.sort_uniq compare ret
 
 and typeOfPat pat tenv venv =
   match pat with
   | PInt _ -> TInt
   | PFloat _ -> TFloat
   | PVar s -> V.instantiate (T.find s tenv) venv
-  | PTuple lst -> TTuple (List.map (fun p -> typeOfPat p tenv venv) lst)
+  | PTuple lst -> TTuple (L.map (fun p -> typeOfPat p tenv venv) lst)
   | PAlias (s, p) -> 
     let ptype = typeOfPat p tenv venv in
     let stype = V.instantiate (T.find s tenv) venv in
@@ -201,8 +228,8 @@ let loadTypeDecl stmt tref =
   match stmt with
   | AlTypeDecl (id, param, conses) -> 
     (* TODO: check if id has been bound already *)
-    let ret = TAlType (id, List.map (fun i -> TVar i) param) in
-    List.iter (
+    let ret = TAlType (id, L.map (fun i -> TVar i) param) in
+    L.iter (
       function
       | (cons, None) -> 
         tref := T.extend (T.variantIDOf cons) (param, ret) !tref
@@ -217,6 +244,7 @@ type typing_result =
   | TRLet of (string * (finalized type_sig)) list
   | TRNone
 
+
 let infer stmt tenv venv =
   match convertF stmt with
   | Expr e ->
@@ -226,16 +254,31 @@ let infer stmt tenv venv =
       loadTypeDecl stmt tenv;
       TRNone
     end
-  | GLetExp (Let (lbl, bnds, _)) ->
-    let k' = List.map (fun (x, _, _) -> Var x) bnds in
-    let nexp = Let (lbl, bnds, Tuple k') in
+
+  | GLetExp (LetRec (bnds, _)) ->
+    let k' = L.map (fun (x, _, _) -> Var x) bnds in
+    let nexp = LetRec (bnds, Tuple k') in
     let TTuple tags = typeOf nexp !tenv venv in
     let res = 
-      List.map 
+      L.map 
         (fun (Var id, tag) -> 
            let u = V.finalize tag venv in
            (tenv := T.extend id u !tenv;
             (id, u)))
-        (List.combine k' tags)
+        (L.combine k' tags)
     in TRLet res
+
+  | GLetExp (Let ((p, v), _)) ->
+    let k' = Il.PatAux.collectAlias p |> L.map (fun (_, s) -> Var s) in
+    let nexp = Let ((p, v), Tuple k') in
+    let TTuple tags = typeOf nexp !tenv venv in
+    let res =
+      L.map
+        (fun (Var id, tag) ->
+           let u = V.finalize tag venv in
+           (tenv := T.extend id u !tenv;
+            (id, u)))
+        (L.combine k' tags)
+    in TRLet res
+
   | _ -> failwith "infer"

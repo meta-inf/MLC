@@ -45,14 +45,16 @@ let rec convert_p exp =
         @@ convert_p k
     in Func (List.map (fun (s, _) -> PVar s) args', k')
 
-  | Let (lbl, lst, k) -> 
-    Let (lbl, 
-         List.map 
-           (fun (s, args, k) -> 
-              if args = [] then (s, [], convert_p k)
-              else (s, [], convert_p (Func (args, k))))
-           lst,
-         convert_p k)
+  | LetRec (lst, k) -> 
+    LetRec (List.map 
+              (fun (s, args, k) -> 
+                 if args = [] then (s, [], convert_p k)
+                 else (s, [], convert_p (Func (args, k))))
+              lst,
+            convert_p k)
+
+  | Let ((p, v), k) ->
+    Let ((p, convert_p v), convert_p k)
 
 
 let rec convert_f exp =
@@ -79,14 +81,16 @@ let rec convert_f exp =
   | Func (arg :: rel, k) ->
     convert_f @@ Func ([arg], Func (rel, k))
 
-  | Let (lbl, lst, k) -> 
-    Let (lbl, 
-         List.map 
-           (fun (s, args, k) -> 
-              if args = [] then (s, [], convert_f k)
-              else failwith "convert_f1")
-           lst,
-         convert_f k)
+  | LetRec (lst, k) -> 
+    LetRec (List.map 
+              (fun (s, args, k) -> 
+                 if args = [] then (s, [], convert_f k)
+                 else failwith "convert_f1")
+              lst,
+            convert_f k)
+
+  | Let ((p, v), k) ->
+    Let ((p, convert_f v), convert_f k)
 
   | _ -> raise Not_implemented
 

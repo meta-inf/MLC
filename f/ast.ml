@@ -17,7 +17,8 @@ type expr =
   | Tuple of expr list
   | AlType of string * (expr list)
   | FunApp of expr * expr
-  | Let of let_label * (string * (pattern list) * expr) list * expr
+  | Let of (pattern * expr) * expr
+  | LetRec of (string * (pattern list) * expr) list * expr
   | Grouped of expr list
   | Func of (pattern list) * expr
   | IfExp of expr * expr * (expr option)

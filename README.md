@@ -7,7 +7,7 @@ Under construction.
 ## What's done
 
 * Tuple, list, algebraic data types
-* Pattern match (except for value declaration)
+* Pattern match
 
 Check `test/` for details.
 
@@ -17,6 +17,11 @@ Check `test/` for details.
 * Runtime support for string & array
 * Readable error messages
 * Recursive type inference (`-rectypes` in OCaml)
+
+## Dependencies
+
+* `yasm`, `gcc`
+* `ocamlbuild`, `menhir` (make) 
 
 ## Syntax
 

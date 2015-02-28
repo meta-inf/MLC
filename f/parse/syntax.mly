@@ -32,7 +32,8 @@ open ParseAux
 %type <Ast.stmt list> prog
 %type <stmt> stmt
 %type <expr> expr, atom_expr
-%type <string * (pattern list) * expr> letbinding
+%type <pattern * expr> letbinding
+%type <string * (pattern list) * expr> letrecbinding
 %type <(pattern * expr) list> match_clauses
 
 %type <pattern> pattern
@@ -52,10 +53,10 @@ prog:	stmt+ EOF	{ $1 }
 
 stmt:	expr SEMICOLON	{ Expr $1 }
 |	altype_decl	{ $1 }
-|	LET h = letbinding t = preceded(AND, letbinding)* SEMICOLON
-	{ GLetExp (Let (NonRec, h :: t, IntConst 0)) }
-|	LET REC h = letbinding t = preceded(AND, letbinding)* SEMICOLON
-	{ GLetExp (Let (Rec, h :: t, IntConst 0)) }
+|	LET h = letbinding SEMICOLON
+	{ GLetExp (Let (h, IntConst 0)) }
+|	LET REC h = letrecbinding t = preceded(AND, letrecbinding)* SEMICOLON
+	{ GLetExp (LetRec (h :: t, IntConst 0)) }
 ;
 
 %inline op:	EQUAL	{ "=" (* FIXME *) }
@@ -78,10 +79,10 @@ expr:	atom_expr	{ $1 }
 		{ FunApp (FunApp (Var o, l), r) }
 |	l = expr; LISTCONS; r = expr
 		{ AlType ("list", [l; r]) }
-|	LET h = letbinding t = preceded(AND, letbinding)* IN b = expr
-		{ Let (NonRec, h :: t, b) }
-|	LET REC h = letbinding t = preceded(AND, letbinding)* IN b = expr
-		{ Let (Rec, h :: t, b) }
+|	LET h = letbinding IN b = expr
+		{ Let (h, b) }
+|	LET REC h = letrecbinding t = preceded(AND, letrecbinding)* IN b = expr
+		{ LetRec (h :: t, b) }
 |	FUNC atom_pattern+ ARROW expr
 		{ Func ($2, $4) }
 |	FUNCTION VERTBAR? cl = match_clauses
@@ -120,7 +121,13 @@ atom_expr:	LID	{ Var $1 }
 		{ Grouped (l :: r) }
 ;
 
-letbinding:	LID atom_pattern* EQUAL expr
+letbinding:	LID atom_pattern+ EQUAL expr
+		{ (PVar $1, Func ($2, $4)) }
+|	pattern EQUAL expr
+		{ ($1, $3) }
+;
+
+letrecbinding:	LID atom_pattern* EQUAL expr
 		{ ($1, $2, $4) }
 
 

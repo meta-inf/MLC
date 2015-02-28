@@ -42,5 +42,7 @@ let showlst l =
     disp "\n"
   end;
 
+showlst $ map ((+) 2) [2, 3, 4];
+
 showlst $ fst $ split $ combine [2, 4] [1, 3];
 showlst $ snd $ split $ combine [2, 4] [1, 3];
