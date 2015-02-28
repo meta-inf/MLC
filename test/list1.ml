@@ -32,7 +32,7 @@ let rec rev_append l1 l2 =
 let rev l = rev_append l [];
 
 let find_all p =
-  let rec find accu = function x -> match x with
+  let rec find accu = function
   | [] -> rev accu
   | x :: l -> if p x then find (x :: accu) l else find accu l in
   find [];
@@ -42,8 +42,7 @@ let filter = find_all;
 let concat a b = rev_append (rev a) b;
 
 let qsort lis =
-  let rec traverse l =
-    match l with
+  let rec traverse = function
     | [] -> []
     | x :: xs -> 
       concat 

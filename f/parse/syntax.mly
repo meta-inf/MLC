@@ -4,7 +4,7 @@ open Types
 open ParseAux
 %}
 
-%token TYPE OF MATCH WITH AS AND LET REC FUNC IN IF THEN ELSE BEGIN END LISTCONS
+%token TYPE OF MATCH WITH AS AND LET REC FUNC FUNCTION IN IF THEN ELSE BEGIN END LISTCONS
 %token LPAREN RPAREN LBRAC RBRAC SEMICOLON ARROW EOF COMMA EQUAL VERTBAR 
 %token<string> LID UID TID OP0 OP1 OP2 OP3 OP4 STRCONST
 %token<int> INTNUM
@@ -13,7 +13,7 @@ open ParseAux
 %nonassoc SEMICOLON
 %nonassoc IN
 %nonassoc LET
-%nonassoc WITH (* WITH < VERTBAR: match a with b -> match c with | d -> .. | e -> .. *)
+%nonassoc FUNCTION WITH (* WITH < VERTBAR: match a with b -> match c with | d -> .. | e -> .. *)
 %nonassoc THEN
 %nonassoc ELSE
 %left VERTBAR
@@ -84,6 +84,8 @@ expr:	atom_expr	{ $1 }
 		{ Let (Rec, h :: t, b) }
 |	FUNC atom_pattern+ ARROW expr
 		{ Func ($2, $4) }
+|	FUNCTION VERTBAR? cl = match_clauses
+		{ Func ([PVar "x/"], MatchExp (Var "x/", cl)) }
 |	MATCH v = expr WITH VERTBAR? cl = match_clauses
 		{ MatchExp (v, cl) }
 |	IF expr THEN expr 

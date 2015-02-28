@@ -31,8 +31,7 @@ let rec map f a =
   | x :: rs -> (f x) :: (map f rs)
 ;
 
-let rec length x =
-  match x with
+let rec length = function
   | [] -> 0
   | a :: rs -> 1 + (length rs)
 ;
