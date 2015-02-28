@@ -5,4 +5,4 @@ let rec fib n =
   | n -> (fib (n - 1)) + (fib (n - 2))
 ;
 
-dispi (fib 20);
+dispi $ fib 20;
