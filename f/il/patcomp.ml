@@ -183,11 +183,8 @@ let translate: string -> (Ast.pattern * IAst.iexpr) list -> IAst.iexpr =
       else
         let (pack, Pool sons), pool' = getTrait lst cpat in
         let TNode (_, path, aval) = nodeOfPack pack in
-        let ptraits = match aval with (* trait to be checked *)
-          | ALabel _ -> 
-            L.filter (fun (p, _) -> pathOfPack p = path) pool'
-          | _ -> [(pack, Pool sons)]
-        in
+        (* check all traits with the same access path *)
+        let ptraits = L.filter (fun (p, _) -> pathOfPack p = path) pool' in
         let traits = ptraits |> L.map (fun (x, _) -> nodeOfPack x) in
         let pool' = 
           L.filter (fun (x, _) -> not (L.mem (nodeOfPack x) traits)) pool' in
