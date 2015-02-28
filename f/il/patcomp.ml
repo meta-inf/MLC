@@ -75,6 +75,52 @@ let markConflict: (trait list * int) list -> ptrait list =
         Pack (t, has @ rst, con @ rst))
       traits
 
+let expandPOr: ((Ast.pattern * IAst.iexpr) list) -> 
+  ((Ast.pattern * IAst.iexpr) list * (IAst.iexpr -> IAst.iexpr)) =
+  let rec expandPat = 
+    let prod lst =
+      let f a b = L.concat @@ L.map (fun ae -> L.map (fun be -> be :: ae) b) a
+      in L.fold_left f [[]] lst |> L.map L.rev
+    in
+    function
+    | PInt _ | PFloat _ | PVar _ as v -> [v]
+    | PTuple lst -> 
+      L.map expandPat lst |> prod 
+      |> L.map (fun x -> PTuple x)
+    | PAlType (v, lst) -> 
+      L.map expandPat lst |> prod 
+      |> L.map (fun x -> PAlType (v, x))
+    | POr (x, y) -> (expandPat x) @ (expandPat y)
+    | PAlias (s, x) -> expandPat x |> L.map (fun x -> PAlias (s, x))
+  in 
+  let genID =
+    let c = ref 0 in
+    fun () -> (c := !c + 1; Printf.sprintf "mbr/%d" !c)
+  in fun lst ->   
+    let bindings = ref [] in
+    let lst0 = 
+      L.map 
+        (fun (p, v) -> 
+           let p' = expandPat p in
+           if p' = [p] then [(p, v)]
+           else 
+             let brID = genID () in
+             let param = snd @@ L.split @@ collectAlias p 
+                         |> (fun l -> if l = [] then ["m/d"] else l)
+             in
+             let call = IE.mscall (brID, param) in
+             begin
+               bindings := (brID, IAst.Lambda (param, v)) :: !bindings;
+               L.map (fun p -> (p, call)) p'
+             end)
+        lst
+      |> L.concat
+    in
+    let tf = 
+      if !bindings = [] then (fun x -> x)
+      else (fun x -> IAst.Let (!bindings, x))
+    in (lst0, tf)
+
 (* Find the next trait to test in (Pool lst), on condition that
  * only patterns in curpats are left to check. *)
 let getTrait lst curpats =
@@ -99,6 +145,7 @@ let getTrait lst curpats =
 (* Build the decision tree; id is matchee's name *)
 let translate: string -> (Ast.pattern * IAst.iexpr) list -> IAst.iexpr =
   fun id inp ->
+    let inp, tf = expandPOr inp in 
     let pat = L.mapi (fun i (a, _) -> (collectTrait a, i)) inp in
     let pool = poolOfTraits @@ markConflict pat in
 
@@ -162,50 +209,5 @@ let translate: string -> (Ast.pattern * IAst.iexpr) list -> IAst.iexpr =
     in
     let pe, ie = PE.init id, IE.init id inp in
     let dec = trav pool (L.mapi (fun i _ -> i) inp) [] pe ie in
-    IE.finalize ie dec 
+    tf @@ IE.finalize ie dec 
 
-(*
-let expandPOr: ((Ast.pattern * Ast.expr) list) -> 
-  ((Ast.pattern * Ast.expr) list * (Ast.expr -> Ast.expr)) =
-  let rec expandPat = function
-    | PInt _ | PFloat _ | PVar _ as v -> [v]
-    | PTuple lst -> 
-      expandPat lst 
-      |> L.fold_left 
-        (fun cur elm -> L.map (fun x -> x :: cur) elm)
-        []
-      |> L.rev_map (fun x -> PTuple x)
-    | PAlType (v, lst) -> 
-      expandPat lst
-      |> L.fold_left
-        (fun cur elm -> L.map (fun x -> x :: cur) elm)
-        []
-      |> L.rev_map (fun x -> PAlType (v, x))
-    | POr (x, y) -> (expandPat x) @ (expandPat y)
-    | PAlias (s, x) -> expandPat x |> L.map (fun x -> PAlias (s, x))
-  in 
-  let getBrPair =
-    let c = ref 0 in
-    fun () -> (c := !c + 1; 
-               (Printf.sprintf "matchbr/%d" !c,
-                Printf.sprintf "mbrnull/%d" !c))
-  in fun lst -> 
-    let bindings = ref [] in
-    let lst0 = 
-      L.map 
-        (fun (p, v) -> 
-           let p' = expandPOr p in
-           if p' = [p] then [(p, v)]
-           else 
-             let brID, xID = getBrPair () in
-             TODO: It's wrong. We need the closure info.
-             (bindings := (brID, [], Func ([PVar xID], v)) :: !bindings;
-              L.map (fun p -> (p, FunApp (Var brID, IntConst 0))) p'))
-        lst
-      |> L.concat
-    in
-    let tf = 
-      if !bindings = [] then (fun x -> x)
-      else (fun x -> Ast.Let (NonRec, !bindings, x))
-    in (lst0, tf)
-*)

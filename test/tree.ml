@@ -41,8 +41,7 @@ let rec splitGT t v =
 
 let rec merge l r =
   match (l, r) with
-  | (a, Nil) -> a
-  | (Nil, a) -> a
+  | (a, Nil) | (Nil, a) -> a
   | (Node (x, a, b), y) -> Node (x, a, merge b y)
 ;
 

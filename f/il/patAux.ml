@@ -81,7 +81,8 @@ let collectAlias: pattern -> (access_path * string) list =
       let lst = L.mapi (fun i e -> trav ((i + 1) :: path) e) l in
       L.concat lst
     | PAlias (s, v) -> (path, s) :: (trav path v)
-    | POr _ -> raise @@ Invalid_argument "cAlias"
+    (* When called in expandPOr, we are not interested in the path *)
+    | POr (x, y) -> trav path x 
   in fun x -> trav [] x
 
 let rec beta exp env =
@@ -133,22 +134,26 @@ struct
       IAst.(FunApp (Identifier "match_failure", IntConst e.id))
     end
 
-  let match_success i pe ie = 
-    let curriedCall (caller, callee) =
-      List.fold_left (fun res cur -> IAst.FunApp (res, cur)) caller callee
+  let mscall (caller, callee) =
+    let caller = Identifier caller in
+    let callee = 
+      if callee = [] then [IAst.IntConst 0] 
+      else callee |> L.map (fun x -> IAst.Identifier x)
     in
+    List.fold_left (fun res cur -> IAst.FunApp (res, cur)) caller callee
+
+  let match_success i pe ie = 
     let names, _, tf =
       L.fold_left 
         (fun (names, pe, tf) path -> 
            let (pe', tf', name) = PE.get_path path pe in
-           (names @ [IAst.Identifier name], pe', fun e -> tf (tf' e)))
+           (names @ [name], pe', fun e -> tf (tf' e)))
         ([], pe, fun x -> x)
         (List.nth ie.param i)
     in
     begin
       ie.suc <- IntSet.add i ie.suc;
-      tf (curriedCall (IAst.Identifier (action_id ie i), 
-                       if names = [] then [IAst.IntConst 0] else names))
+      tf (mscall (action_id ie i, names))
     end
 end
 

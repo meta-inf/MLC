@@ -14,8 +14,7 @@ showlst [1, 2];
 
 let rec merge cmp l1 l2 =
   match (l1, l2) with
-  | ([], l2) -> l2
-  | (l1, []) -> l1
+  | ([], lx) | (lx, []) -> lx
   | (h1 :: t1, h2 :: t2) ->
       if cmp h1 h2 < 0
       then h1 :: merge cmp t1 l2
@@ -52,4 +51,4 @@ let qsort lis =
         (x :: (traverse (filter (fun y -> x < y) xs)))
   in traverse lis;
 
-let a = qsort [1, 3, 2, 5, 4] in showlst a;
+showlst $ qsort [6, 7, 8, 10, 1, 3, 2, 5, 4, 0, 9];
