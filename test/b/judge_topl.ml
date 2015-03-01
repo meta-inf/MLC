@@ -1,10 +1,10 @@
 (* Setup test environment for toplevel. May need to run ocamlbuild to get 
  * related binaries first. *)
 
-#directory "../_build";;
-#directory "../_build/interp";;
-#directory "../_build/parse";;
-#directory "../_build/native";;
+#directory "../../b/_build";;
+#directory "../../b/_build/interp";;
+#directory "../../b/_build/parse";;
+#directory "../../b/_build/native";;
 
 #load_rec "ast.cmo";;
 #load_rec "parse.cmo";;
@@ -17,7 +17,6 @@
 #load_rec "prereg.cmo";;
 #load_rec "prep.cmo";;
 #load_rec "test.cmo";;
-#load_rec "judge_reg.cmo";;
 #load "unix.cma";;
 
 #use "judge.ml";;

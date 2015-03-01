@@ -1,9 +1,9 @@
 (* Setup test environment for toplevel. May need to run ocamlbuild to get 
  * related binaries first. *)
 
-#directory "_build";;
-#directory "_build/parse";;
-#directory "_build/typec";;
+#directory "../../f/_build";;
+#directory "../../f/_build/parse";;
+#directory "../../f/_build/typec";;
 
 #load_rec "ast.d.cmo";;
 #load_rec "iAst.d.cmo";;
